@@ -63,9 +63,10 @@ class Job(object):
         return r            
         
 class JobRegistry(object):   
-    def __init__(self, f, cmd):
+    def __init__(self, f, cmd, pow_algo):
         self.f = f
         self.cmd = cmd # execute this command on new block
+        self.pow_algo = pow_algo # name of proof-of-work algorithm
         self.jobs = []        
         self.last_job = None
         self.extranonce1 = None
@@ -92,7 +93,10 @@ class JobRegistry(object):
         self.extranonce1_bin = binascii.unhexlify(extranonce1)
         
     def set_difficulty(self, new_difficulty):
-        dif1 = 0x00000000ffff0000000000000000000000000000000000000000000000000000 
+        if self.pow_algo == 'scrypt':
+            dif1 = 0x0000ffff00000000000000000000000000000000000000000000000000000000
+        else:
+            dif1 = 0x00000000ffff0000000000000000000000000000000000000000000000000000
         self.target = int(dif1 / new_difficulty)
         self.target_hex = binascii.hexlify(utils.uint256_to_str(self.target))
         self.difficulty = new_difficulty
