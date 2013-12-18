@@ -63,11 +63,9 @@ class Job(object):
         return r            
         
 class JobRegistry(object):   
-    def __init__(self, f, cmd, real_target, use_old_target=False):
+    def __init__(self, f, cmd):
         self.f = f
         self.cmd = cmd # execute this command on new block
-        self.real_target = real_target # Indicates if real stratum target will be propagated to miners
-        self.use_old_target = use_old_target # Use 00000000fffffff...f instead of correct 00000000ffffffff...0 target for really old miners
         self.jobs = []        
         self.last_job = None
         self.extranonce1 = None
@@ -187,12 +185,7 @@ class JobRegistry(object):
         
         result = {'data': block_header}
         
-        if self.use_old_target:
-            result['target'] = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000'
-        elif self.real_target:
-            result['target'] = self.target_hex
-        else:
-            result['target'] = self.target1_hex
+        result['target'] = self.target_hex
             
         return result            
         
@@ -201,17 +194,17 @@ class JobRegistry(object):
         header = header[:160]
 
         # 1. Check if blockheader meets requested difficulty
-        header_bin = binascii.unhexlify(header[:160])
-        rev = ''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ])
-        hash_bin = utils.doublesha(rev)
-        block_hash = ''.join([ hash_bin[i*4:i*4+4][::-1] for i in range(0, 8) ])
+        #header_bin = binascii.unhexlify(header[:160])
+        #rev = ''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ])
+        #hash_bin = utils.doublesha(rev)
+        #block_hash = ''.join([ hash_bin[i*4:i*4+4][::-1] for i in range(0, 8) ])
         
         #log.info('!!! %s' % header[:160])
-        log.info("Submitting %s" % utils.format_hash(binascii.hexlify(block_hash)))
+        #log.info("Submitting %s" % utils.format_hash(binascii.hexlify(block_hash)))
         
-        if utils.uint256_from_str(hash_bin) > self.target:
-            log.debug("Share is below expected target")
-            return True
+        #if utils.uint256_from_str(hash_bin) > self.target:
+        #    log.debug("Share is below expected target")
+        #    return True
         
         # 2. Lookup for job and extranonce used for creating given block header
         try:
