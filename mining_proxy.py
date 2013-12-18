@@ -30,7 +30,6 @@ def parse_args():
     parser.add_argument('-sp', '--stratum-port', dest='stratum_port', type=int, default=3333, help='Port on which port listen for stratum miners.')
     parser.add_argument('-oh', '--getwork-host', dest='getwork_host', type=str, default='0.0.0.0', help='On which network interface listen for getwork miners. Use "localhost" for listening on internal IP only.')
     parser.add_argument('-gp', '--getwork-port', dest='getwork_port', type=int, default=8332, help='Port on which port listen for getwork miners. Use another port if you have bitcoind RPC running on this machine already.')
-    parser.add_argument('-nm', '--no-midstate', dest='no_midstate', action='store_true', help="Don't compute midstate for getwork. This has outstanding performance boost, but some old miners like Diablo don't work without midstate.")
     parser.add_argument('-rt', '--real-target', dest='real_target', action='store_true', help="Propagate >diff1 target to getwork miners. Some miners work incorrectly with higher difficulty.")
     parser.add_argument('-cl', '--custom-lp', dest='custom_lp', type=str, help='Override URL provided in X-Long-Polling header')
     parser.add_argument('-cs', '--custom-stratum', dest='custom_stratum', type=str, help='Override URL provided in X-Stratum header')
@@ -121,20 +120,18 @@ def on_disconnect(f, workers, job_registry):
 def test_launcher(result, job_registry):
     def run_test():
         log.info("Running performance self-test...")
-        for m in (True, False):
-            log.info("Generating with midstate: %s" % m)
-            log.info("Example getwork:")
-            log.info(job_registry.getwork(no_midstate=not m))
+        log.info("Example getwork:")
+        log.info(job_registry.getwork())
 
-            start = time.time()
-            n = 10000
-            
-            for x in range(n):
-                job_registry.getwork(no_midstate=not m)
-                
-            log.info("%d getworks generated in %.03f sec, %d gw/s" % \
-                     (n, time.time() - start, n / (time.time()-start)))
-            
+        start = time.time()
+        n = 10000
+        
+        for x in range(n):
+            job_registry.getwork()
+        
+        log.info("%d getworks generated in %.03f sec, %d gw/s" % \
+                 (n, time.time() - start, n / (time.time()-start)))
+        
         log.info("Test done")
     reactor.callLater(1, run_test)
     return result
@@ -213,7 +210,7 @@ def main(args):
     
     
     job_registry = jobs.JobRegistry(f, cmd=args.blocknotify_cmd,
-                   no_midstate=args.no_midstate, real_target=args.real_target, use_old_target=args.old_target)
+                   real_target=args.real_target, use_old_target=args.old_target)
     client_service.ClientMiningService.job_registry = job_registry
     client_service.ClientMiningService.reset_timeout()
     

@@ -19,7 +19,7 @@ args = {
     'author_email': 'info@bitcion.cz',
     'url': 'http://mining.bitcoin.cz/stratum-mining/',
     'py_modules': ['mining_libs.client_service', 'mining_libs.getwork_listener',
-                   'mining_libs.jobs', 'mining_libs.midstate',
+                   'mining_libs.jobs',
                    'mining_libs.multicast_responder', 'mining_libs.stratum_listener',
                    'mining_libs.utils', 'mining_libs.version', 'mining_libs.worker_registry'],
     'install_requires': ['setuptools>=0.6c11', 'twisted>=12.2.0', 'stratum>=0.2.11', 'argparse'],

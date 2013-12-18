@@ -83,8 +83,7 @@ class Root(Resource):
                 # getwork request
                 log.info("Worker '%s' asks for new work" % worker_name)
                 extensions = request.getHeader('x-mining-extensions')
-                no_midstate =  extensions and 'midstate' in extensions
-                request.write(self.json_response(data.get('id', 0), self.job_registry.getwork(no_midstate=no_midstate)))
+                request.write(self.json_response(data.get('id', 0), self.job_registry.getwork()))
                 request.finish()
                 return
             
@@ -129,8 +128,7 @@ class Root(Resource):
             
         log.info("LP broadcast for worker '%s'" % worker_name)
         extensions = request.getHeader('x-mining-extensions')
-        no_midstate =  extensions and 'midstate' in extensions
-        payload = self.json_response(0, self.job_registry.getwork(no_midstate=no_midstate))
+        payload = self.json_response(0, self.job_registry.getwork())
         
         try:
             request.write(payload)

@@ -11,23 +11,6 @@ import utils
 import stratum.logger
 log = stratum.logger.get_logger('proxy')
 
-# This fix py2exe issue with packaging the midstate module
-from midstate import calculateMidstate as __unusedimport
-
-try:
-    from midstatec.midstatec import test as midstateTest, midstate as calculateMidstate
-    if not midstateTest():
-        log.warning("midstate library didn't passed self test!")
-        raise ImportError("midstatec not usable")
-    log.info("Using C extension for midstate speedup. Good!")
-except ImportError:
-    log.info("C extension for midstate not available. Using default implementation instead.")
-    try:    
-        from midstate import calculateMidstate
-    except ImportError:
-        calculateMidstate = None
-        log.exception("No midstate generator available. Some old miners won't work properly.")
-
 class Job(object):
     def __init__(self):
         self.job_id = None
@@ -80,10 +63,9 @@ class Job(object):
         return r            
         
 class JobRegistry(object):   
-    def __init__(self, f, cmd, no_midstate, real_target, use_old_target=False):
+    def __init__(self, f, cmd, real_target, use_old_target=False):
         self.f = f
         self.cmd = cmd # execute this command on new block
-        self.no_midstate = no_midstate # Indicates if calculate midstate for getwork
         self.real_target = real_target # Indicates if real stratum target will be propagated to miners
         self.use_old_target = use_old_target # Use 00000000fffffff...f instead of correct 00000000ffffffff...0 target for really old miners
         self.jobs = []        
@@ -171,7 +153,7 @@ class JobRegistry(object):
         extranonce2 = job.merkle_to_extranonce2[merkle_hash]
         return (job, extranonce2)
         
-    def getwork(self, no_midstate=True):
+    def getwork(self):
         '''Miner requests for new getwork'''
         
         job = self.last_job # Pick the latest job from pool
@@ -200,12 +182,10 @@ class JobRegistry(object):
         # 8. Register job params
         self.register_merkle(job, merkle_root, extranonce2)
         
-        # 9. Prepare hash1, calculate midstate and fill the response object
+        # 9. Fill the response object
         header_bin = binascii.unhexlify(block_header)[:64]
-        hash1 = "00000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000010000"
-
-        result = {'data': block_header,
-                'hash1': hash1}
+        
+        result = {'data': block_header}
         
         if self.use_old_target:
             result['target'] = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000'
@@ -213,10 +193,6 @@ class JobRegistry(object):
             result['target'] = self.target_hex
         else:
             result['target'] = self.target1_hex
-    
-        if calculateMidstate and not (no_midstate or self.no_midstate):
-            # Midstate module not found or disabled
-            result['midstate'] = binascii.hexlify(calculateMidstate(header_bin))
             
         return result            
         
