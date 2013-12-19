@@ -24,7 +24,7 @@ import socket
 
 def parse_args():
     parser = argparse.ArgumentParser(description='This proxy allows you to run getwork-based miners against Stratum mining pool.')
-    parser.add_argument('-o', '--host', dest='host', type=str, default='stratum.bitcoin.cz', help='Hostname of Stratum mining pool')
+    parser.add_argument('-o', '--host', dest='host', type=str, default='litecoinpool.org', help='Hostname of Stratum mining pool')
     parser.add_argument('-p', '--port', dest='port', type=int, default=3333, help='Port of Stratum mining pool')
     parser.add_argument('-sh', '--stratum-host', dest='stratum_host', type=str, default='0.0.0.0', help='On which network interface listen for stratum miners. Use "localhost" for listening on internal IP only.')
     parser.add_argument('-sp', '--stratum-port', dest='stratum_port', type=int, default=3333, help='Port on which port listen for stratum miners.')
@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument('-cs', '--custom-stratum', dest='custom_stratum', type=str, help='Override URL provided in X-Stratum header')
     parser.add_argument('-cu', '--custom-user', dest='custom_user', type=str, help='Use this username for submitting shares')
     parser.add_argument('-cp', '--custom-password', dest='custom_password', type=str, help='Use this password for submitting shares')
-    parser.add_argument('-pa', dest='pow_algo', type=str, default='sha256d', help='Set proof-of-work algorithm')
+    parser.add_argument('-pa', '--pow-algo', dest='pow_algo', type=str, default='scrypt', help='Set proof-of-work algorithm')
     parser.add_argument('--blocknotify', dest='blocknotify_cmd', type=str, default='', help='Execute command when the best block changes (%%s in BLOCKNOTIFY_CMD is replaced by block hash)')
     parser.add_argument('--socks', dest='proxy', type=str, default='', help='Use socks5 proxy for upstream Stratum connection, specify as host:port')
     parser.add_argument('--tor', dest='tor', action='store_true', help='Configure proxy to mine over Tor (requires Tor running on local machine)')
@@ -162,7 +162,7 @@ def main(args):
     if args.tor:
         log.warning("Configuring Tor connection")
         args.proxy = '127.0.0.1:9050'
-        args.host = 'pool57wkuu5yuhzb.onion'
+        args.host = 'ltcpool5brio2gaj.onion'
         args.port = 3333
         
     if args.proxy:
