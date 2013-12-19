@@ -46,16 +46,11 @@ def detect_stratum(host, port):
     Not the most elegant code, but it works,
     because Stratum server should close the connection
     when client uses unknown payload.'''
-        
-    def get_raw_page(url, *args, **kwargs):
-        scheme, host, port, path = client._parse(url)
-        factory = client.HTTPClientFactory(url, *args, **kwargs)
-        reactor.connectTCP(host, port, factory)
-        return factory
-
+    
     def _on_callback(_, d):d.callback(True)
     def _on_errback(_, d): d.callback(True)
-    f = get_raw_page('http://%s:%d' % (host, port))
+    f = client.HTTPClientFactory('http://%s:%d' % (host, port))
+    reactor.connectTCP(host, port, f)
     
     d = defer.Deferred()
     f.deferred.addCallback(_on_callback, d)
